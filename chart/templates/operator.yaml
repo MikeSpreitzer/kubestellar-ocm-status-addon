@@ -196,14 +196,14 @@ apiVersion: apps/v1
 metadata:
   name: status-controller
   labels:
-    control-plane: controller-manager
-    app.kubernetes.io/name: deployment
-    app.kubernetes.io/instance: controller-manager
+    app: status-controller
     app.kubernetes.io/component: manager
     app.kubernetes.io/created-by: status-addon
-    app.kubernetes.io/part-of: status-addon
+    app.kubernetes.io/instance: controller-manager
     app.kubernetes.io/managed-by: kustomize
-    app: status-controller
+    app.kubernetes.io/name: deployment
+    app.kubernetes.io/part-of: status-addon
+    control-plane: controller-manager
 spec:
   replicas: 1
   selector:
@@ -221,12 +221,12 @@ spec:
         args:
         - |
           echo -n "Waiting for managedclusteraddons CRD"
-          while [ "$(kubectl get crd clustermanagementaddons.addon.open-cluster-management.io 2> /dev/null)" == "" ] ; do
+          while ! kubectl get clustermanagementaddons.addon.open-cluster-management.io &> /dev/null ; do
             echo -n "."
-            sleep 1
+            sleep 5
           done
           echo -e "\033[0;32m\xE2\x9C\x94\033[0m"
-          echo "Creating addon-status CR:"
+          echo "Creating addon-status object:"
           kubectl apply -f - <<EOF
           apiVersion: addon.open-cluster-management.io/v1alpha1
           kind: ClusterManagementAddOn
